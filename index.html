@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nie otwieraj tych drzwi</title>
+
+  <style>
+    body {
+      background: #0b0910;
+      color: #e8e3ed;
+      font-family: Georgia, serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .game {
+      width: 90%;
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+
+    #story {
+      font-size: 19px;
+      line-height: 1.7;
+      margin-bottom: 35px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 12px 0;
+      background: transparent;
+      color: #e8e3ed;
+      border: 1px solid #62566d;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #18121f;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="game">
+
+    <h1>Nie otwieraj tych drzwi</h1>
+
+    <div id="story">
+      <p>Budzisz się na podłodze.</p>
+      <p>Nie pamiętasz, jak tu trafiłaś.</p>
+      <p>Telefon leżący obok pokazuje 03:17.</p>
+      <p>Ktoś puka do drzwi.</p>
+    </div>
+
+    <div id="choices">
+      <button onclick="choose('phone')">Sprawdź telefon</button>
+      <button onclick="choose('mirror')">Podejdź do lustra</button>
+      <button onclick="choose('door')">Otwórz drzwi</button>
+    </div>
+
+  </main>
+
+  <script>
+    function choose(choice) {
+
+      const story = document.getElementById("story");
+      const choices = document.getElementById("choices");
+
+      if (choice === "phone") {
+        story.innerHTML = `
+          <p>Na ekranie czeka jedna nieprzeczytana wiadomość.</p>
+          <p>Nadawca: <strong>Ty</strong></p>
+          <p>„Cokolwiek się stanie, nie patrz w lustro.”</p>
+        `;
+
+        choices.innerHTML = `
+          <button onclick="choose('mirror')">Spójrz w lustro</button>
+          <button onclick="choose('door')">Podejdź do drzwi</button>
+        `;
+      }
+
+      if (choice === "mirror") {
+        story.innerHTML = `
+          <p>Podchodzisz do lustra.</p>
+          <p>Twoje odbicie patrzy prosto na Ciebie.</p>
+          <p>Problem w tym, że Ty jeszcze nie podniosłaś głowy.</p>
+        `;
+
+        choices.innerHTML = `
+          <button onclick="location.reload()">Zacznij od początku</button>
+        `;
+      }
+
+      if (choice === "door") {
+        story.innerHTML = `
+          <p>Pukanie ustaje.</p>
+          <p>Kładziesz dłoń na klamce.</p>
+          <p>Telefon za Tobą zaczyna dzwonić.</p>
+          <p>Na ekranie pojawia się jedno słowo:</p>
+          <p><strong>UCIEKAJ.</strong></p>
+        `;
+
+        choices.innerHTML = `
+          <button onclick="location.reload()">Zacznij od początku</button>
+        `;
+      }
+    }
+  </script>
+
+</body>
+</html>
