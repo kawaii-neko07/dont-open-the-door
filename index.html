@@ -3,72 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Nie otwieraj tych drzwi</title>
 
   <style>
+    :root {
+      --bg: #09070d;
+      --panel: #111018;
+      --text: #ece8f2;
+      --muted: #8d8496;
+      --line: #4f4658;
+      --accent: #b9a8c9;
+      --secret: #d8c4ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: #0b0910;
-      color: #e8e3ed;
-      font-family: Georgia, serif;
-      min-height: 100vh;
       margin: 0;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      background:
+        radial-gradient(circle at top, #16101e 0%, var(--bg) 45%, #050407 100%);
+      color: var(--text);
+      font-family: Georgia, serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.012),
+          rgba(255,255,255,0.012) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+      opacity: 0.35;
     }
 
     .game {
-      width: 90%;
-      max-width: 650px;
-      padding: 30px 0;
+      width: min(90%, 680px);
+      padding: 50px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 26px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .counter {
+      white-space: nowrap;
     }
 
     h1 {
-      font-size: 34px;
-      margin-bottom: 28px;
+      margin: 0 0 34px;
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.1;
+      font-weight: 600;
+      letter-spacing: -0.02em;
     }
 
     #story {
       font-size: 19px;
-      line-height: 1.75;
-      margin-bottom: 35px;
+      line-height: 1.8;
+      margin-bottom: 34px;
+      min-height: 230px;
+    }
+
+    #story p {
+      margin: 0 0 18px;
+      opacity: 0;
+      transform: translateY(7px);
+      animation: revealText 0.55s ease forwards;
+    }
+
+    #story p:nth-child(2) { animation-delay: 0.08s; }
+    #story p:nth-child(3) { animation-delay: 0.16s; }
+    #story p:nth-child(4) { animation-delay: 0.24s; }
+    #story p:nth-child(5) { animation-delay: 0.32s; }
+    #story p:nth-child(6) { animation-delay: 0.40s; }
+
+    @keyframes revealText {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #choices {
+      opacity: 0;
+      animation: showChoices 0.5s ease 0.45s forwards;
+    }
+
+    @keyframes showChoices {
+      to {
+        opacity: 1;
+      }
     }
 
     button {
       display: block;
       width: 100%;
-      padding: 15px;
+      padding: 15px 18px;
       margin: 12px 0;
-      background: transparent;
-      color: #e8e3ed;
-      border: 1px solid #62566d;
-      border-radius: 8px;
-      cursor: pointer;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.015);
+      color: var(--text);
+      font: inherit;
       font-size: 16px;
-      transition: 0.2s;
+      cursor: pointer;
+      text-align: left;
+      transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
     }
 
     button:hover {
-      background: #18121f;
-      transform: translateY(-1px);
+      background: rgba(255,255,255,0.055);
+      border-color: var(--accent);
+      transform: translateX(3px);
     }
 
-    .ending {
-      margin-top: 30px;
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .ending-box {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .ending-title {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .ending-found {
+      margin-top: 8px;
+      color: var(--accent);
       font-size: 14px;
-      opacity: 0.65;
+    }
+
+    .secret-mode {
+      animation: secretPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes secretPulse {
+      0%, 100% {
+        box-shadow: inset 0 0 0 rgba(210,190,255,0);
+      }
+      50% {
+        box-shadow: inset 0 0 70px rgba(210,190,255,0.08);
+      }
+    }
+
+    .secret-mode h1 {
+      color: var(--secret);
+      text-shadow: 0 0 18px rgba(216,196,255,0.25);
+    }
+
+    .discovered {
+      margin-top: 42px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .discovered-list {
+      margin-top: 10px;
+      line-height: 1.8;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .game {
+        width: 88%;
+        padding: 35px 0;
+      }
+
+      #story {
+        font-size: 17px;
+        min-height: 200px;
+      }
+
+      button {
+        font-size: 15px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <main class="game">
+  <main class="game" id="game">
+
+    <div class="topbar">
+      <span>03:17</span>
+      <span class="counter" id="counter">Zakończenia: 0/4</span>
+    </div>
 
     <h1>Nie otwieraj tych drzwi</h1>
 
     <div id="story"></div>
     <div id="choices"></div>
+
+    <div class="discovered">
+      <div>Odkryte zakończenia</div>
+      <div class="discovered-list" id="discoveredList">
+        Jeszcze żadnego.
+      </div>
+    </div>
 
   </main>
 
@@ -79,10 +251,58 @@
       heardVoice: false
     };
 
+    const endingNames = {
+      reflection: "Odbicie",
+      loop: "Pętla",
+      dawn: "Świt",
+      otherSide: "Druga strona"
+    };
+
     const story = document.getElementById("story");
     const choices = document.getElementById("choices");
+    const counter = document.getElementById("counter");
+    const discoveredList = document.getElementById("discoveredList");
+    const game = document.getElementById("game");
+
+    function getDiscoveredEndings() {
+      return JSON.parse(
+        localStorage.getItem("dontOpenTheDoorEndings") || "[]"
+      );
+    }
+
+    function saveEnding(id) {
+      const discovered = getDiscoveredEndings();
+
+      if (!discovered.includes(id)) {
+        discovered.push(id);
+        localStorage.setItem(
+          "dontOpenTheDoorEndings",
+          JSON.stringify(discovered)
+        );
+        return true;
+      }
+
+      return false;
+    }
+
+    function updateProgress() {
+      const discovered = getDiscoveredEndings();
+
+      counter.textContent = `Zakończenia: ${discovered.length}/4`;
+
+      if (discovered.length === 0) {
+        discoveredList.textContent = "Jeszcze żadnego.";
+        return;
+      }
+
+      discoveredList.innerHTML = discovered
+        .map(id => `• ${endingNames[id]}`)
+        .join("<br>");
+    }
 
     function showScene(text, options) {
+      game.classList.remove("secret-mode");
+
       story.innerHTML = text;
       choices.innerHTML = "";
 
@@ -92,6 +312,10 @@
         button.onclick = option.action;
         choices.appendChild(button);
       });
+
+      choices.style.animation = "none";
+      void choices.offsetWidth;
+      choices.style.animation = "showChoices 0.5s ease 0.45s forwards";
     }
 
     function startGame() {
@@ -198,7 +422,11 @@
     }
 
     function doorScene() {
-      if (gameState.readMessage && gameState.checkedMirror && gameState.heardVoice) {
+      if (
+        gameState.readMessage &&
+        gameState.checkedMirror &&
+        gameState.heardVoice
+      ) {
         showScene(
           `
           <p>Kładziesz rękę na klamce.</p>
@@ -207,8 +435,14 @@
           <p>Pukanie nigdy nie dochodziło z drugiej strony drzwi.</p>
           `,
           [
-            { text: "Nie otwieraj. Zgaś światło.", action: secretEnding },
-            { text: "Mimo wszystko otwórz", action: badEnding }
+            {
+              text: "Nie otwieraj. Zgaś światło.",
+              action: secretEnding
+            },
+            {
+              text: "Mimo wszystko otwórz",
+              action: badEnding
+            }
           ]
         );
       } else {
@@ -230,6 +464,7 @@
 
     function mirrorEnding() {
       ending(
+        "reflection",
         `
         <p>Dotykasz powierzchni lustra.</p>
         <p>Jest ciepła.</p>
@@ -243,6 +478,7 @@
 
     function badEnding() {
       ending(
+        "loop",
         `
         <p>Drzwi otwierają się bez oporu.</p>
         <p>Za nimi nie ma korytarza.</p>
@@ -256,6 +492,7 @@
 
     function surviveEnding() {
       ending(
+        "dawn",
         `
         <p>Zamykasz oczy.</p>
         <p>Kroki zatrzymują się tuż obok.</p>
@@ -269,7 +506,10 @@
     }
 
     function secretEnding() {
+      game.classList.add("secret-mode");
+
       ending(
+        "otherSide",
         `
         <p>Nie otwierasz drzwi.</p>
         <p>Zamiast tego gasisz światło.</p>
@@ -282,8 +522,19 @@
       );
     }
 
-    function ending(text, title) {
-      story.innerHTML = text + `<p class="ending">${title}</p>`;
+    function ending(id, text, title) {
+      const isNew = saveEnding(id);
+
+      story.innerHTML = text + `
+        <div class="ending-box">
+          <div class="ending-title">${title}</div>
+          ${
+            isNew
+              ? `<div class="ending-found">Nowe zakończenie odkryte.</div>`
+              : ""
+          }
+        </div>
+      `;
 
       choices.innerHTML = "";
 
@@ -292,15 +543,21 @@
       restart.onclick = restartGame;
 
       choices.appendChild(restart);
+
+      updateProgress();
     }
 
     function restartGame() {
       gameState.readMessage = false;
       gameState.checkedMirror = false;
       gameState.heardVoice = false;
+
+      game.classList.remove("secret-mode");
+
       startGame();
     }
 
+    updateProgress();
     startGame();
   </script>
 
