@@ -19,17 +19,18 @@
 
     .game {
       width: 90%;
-      max-width: 600px;
+      max-width: 650px;
+      padding: 30px 0;
     }
 
     h1 {
-      font-size: 32px;
-      margin-bottom: 30px;
+      font-size: 34px;
+      margin-bottom: 28px;
     }
 
     #story {
       font-size: 19px;
-      line-height: 1.7;
+      line-height: 1.75;
       margin-bottom: 35px;
     }
 
@@ -44,10 +45,18 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
+      transition: 0.2s;
     }
 
     button:hover {
       background: #18121f;
+      transform: translateY(-1px);
+    }
+
+    .ending {
+      margin-top: 30px;
+      font-size: 14px;
+      opacity: 0.65;
     }
   </style>
 </head>
@@ -58,66 +67,241 @@
 
     <h1>Nie otwieraj tych drzwi</h1>
 
-    <div id="story">
-      <p>Budzisz się na podłodze.</p>
-      <p>Nie pamiętasz, jak tu trafiłaś.</p>
-      <p>Telefon leżący obok pokazuje 03:17.</p>
-      <p>Ktoś puka do drzwi.</p>
-    </div>
-
-    <div id="choices">
-      <button onclick="choose('phone')">Sprawdź telefon</button>
-      <button onclick="choose('mirror')">Podejdź do lustra</button>
-      <button onclick="choose('door')">Otwórz drzwi</button>
-    </div>
+    <div id="story"></div>
+    <div id="choices"></div>
 
   </main>
 
   <script>
-    function choose(choice) {
+    const gameState = {
+      readMessage: false,
+      checkedMirror: false,
+      heardVoice: false
+    };
 
-      const story = document.getElementById("story");
-      const choices = document.getElementById("choices");
+    const story = document.getElementById("story");
+    const choices = document.getElementById("choices");
 
-      if (choice === "phone") {
-        story.innerHTML = `
-          <p>Na ekranie czeka jedna nieprzeczytana wiadomość.</p>
-          <p>Nadawca: <strong>Ty</strong></p>
-          <p>„Cokolwiek się stanie, nie patrz w lustro.”</p>
-        `;
+    function showScene(text, options) {
+      story.innerHTML = text;
+      choices.innerHTML = "";
 
-        choices.innerHTML = `
-          <button onclick="choose('mirror')">Spójrz w lustro</button>
-          <button onclick="choose('door')">Podejdź do drzwi</button>
-        `;
-      }
+      options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option.text;
+        button.onclick = option.action;
+        choices.appendChild(button);
+      });
+    }
 
-      if (choice === "mirror") {
-        story.innerHTML = `
-          <p>Podchodzisz do lustra.</p>
-          <p>Twoje odbicie patrzy prosto na Ciebie.</p>
-          <p>Problem w tym, że Ty jeszcze nie podniosłaś głowy.</p>
-        `;
+    function startGame() {
+      showScene(
+        `
+        <p>Budzisz się na podłodze.</p>
+        <p>Nie pamiętasz, jak tu trafiłaś.</p>
+        <p>Telefon leżący obok pokazuje 03:17.</p>
+        <p>Ktoś puka do drzwi.</p>
+        `,
+        [
+          { text: "Sprawdź telefon", action: phoneScene },
+          { text: "Podejdź do lustra", action: mirrorScene },
+          { text: "Podejdź do drzwi", action: doorScene }
+        ]
+      );
+    }
 
-        choices.innerHTML = `
-          <button onclick="location.reload()">Zacznij od początku</button>
-        `;
-      }
+    function phoneScene() {
+      gameState.readMessage = true;
 
-      if (choice === "door") {
-        story.innerHTML = `
-          <p>Pukanie ustaje.</p>
+      showScene(
+        `
+        <p>Na ekranie czeka jedna nieprzeczytana wiadomość.</p>
+        <p>Nadawca: <strong>Ty</strong></p>
+        <p>„Jeśli obudzisz się o 03:17, nie otwieraj drzwi.”</p>
+        <p>Pod spodem jest jeszcze jedna linijka.</p>
+        <p>„Najpierw sprawdź, czy nadal jesteś sama.”</p>
+        `,
+        [
+          { text: "Podejdź do lustra", action: mirrorScene },
+          { text: "Nasłuchuj", action: listenScene },
+          { text: "Podejdź do drzwi", action: doorScene }
+        ]
+      );
+    }
+
+    function mirrorScene() {
+      gameState.checkedMirror = true;
+
+      showScene(
+        `
+        <p>Podchodzisz do lustra.</p>
+        <p>Twoje odbicie stoi nieruchomo.</p>
+        <p>Ty oddychasz.</p>
+        <p>Ono nie.</p>
+        <p>Po chwili odbicie unosi palec do ust.</p>
+        `,
+        [
+          { text: "Cofnij się od lustra", action: listenScene },
+          { text: "Dotknij lustra", action: mirrorEnding }
+        ]
+      );
+    }
+
+    function listenScene() {
+      gameState.heardVoice = true;
+
+      showScene(
+        `
+        <p>Przestajesz się ruszać.</p>
+        <p>Pukanie do drzwi milknie.</p>
+        <p>Przez kilka sekund słyszysz tylko własny oddech.</p>
+        <p>Potem zza pleców dochodzi szept.</p>
+        <p>„Nie odpowiadaj.”</p>
+        `,
+        [
+          { text: "Odwróć się", action: turnAroundScene },
+          { text: "Podejdź do drzwi", action: doorScene }
+        ]
+      );
+    }
+
+    function turnAroundScene() {
+      showScene(
+        `
+        <p>Odwracasz się powoli.</p>
+        <p>Pokój jest pusty.</p>
+        <p>Telefon ponownie się rozświetla.</p>
+        <p>Nowa wiadomość:</p>
+        <p><strong>„Teraz już wie, że ją słyszysz.”</strong></p>
+        `,
+        [
+          { text: "Schowaj się", action: hideScene },
+          { text: "Otwórz drzwi", action: doorScene }
+        ]
+      );
+    }
+
+    function hideScene() {
+      showScene(
+        `
+        <p>Wciskasz się między łóżko a ścianę.</p>
+        <p>Klamka powoli opada.</p>
+        <p>Drzwi się nie otwierają.</p>
+        <p>Zamiast tego słyszysz kroki.</p>
+        <p>Po swojej stronie pokoju.</p>
+        `,
+        [
+          { text: "Zamknij oczy", action: surviveEnding },
+          { text: "Spójrz w stronę kroków", action: badEnding }
+        ]
+      );
+    }
+
+    function doorScene() {
+      if (gameState.readMessage && gameState.checkedMirror && gameState.heardVoice) {
+        showScene(
+          `
+          <p>Kładziesz rękę na klamce.</p>
+          <p>Przypominasz sobie wiadomość, lustro i szept.</p>
+          <p>Nagle rozumiesz.</p>
+          <p>Pukanie nigdy nie dochodziło z drugiej strony drzwi.</p>
+          `,
+          [
+            { text: "Nie otwieraj. Zgaś światło.", action: secretEnding },
+            { text: "Mimo wszystko otwórz", action: badEnding }
+          ]
+        );
+      } else {
+        showScene(
+          `
           <p>Kładziesz dłoń na klamce.</p>
+          <p>Pukanie ustaje.</p>
           <p>Telefon za Tobą zaczyna dzwonić.</p>
           <p>Na ekranie pojawia się jedno słowo:</p>
           <p><strong>UCIEKAJ.</strong></p>
-        `;
-
-        choices.innerHTML = `
-          <button onclick="location.reload()">Zacznij od początku</button>
-        `;
+          `,
+          [
+            { text: "Otwórz drzwi", action: badEnding },
+            { text: "Cofnij rękę", action: listenScene }
+          ]
+        );
       }
     }
+
+    function mirrorEnding() {
+      ending(
+        `
+        <p>Dotykasz powierzchni lustra.</p>
+        <p>Jest ciepła.</p>
+        <p>Odbicie uśmiecha się.</p>
+        <p>Ty nie.</p>
+        <p>Po chwili po tej stronie lustra zostaje już tylko jedna osoba.</p>
+        `,
+        "ZAKOŃCZENIE: ODBICIE"
+      );
+    }
+
+    function badEnding() {
+      ending(
+        `
+        <p>Drzwi otwierają się bez oporu.</p>
+        <p>Za nimi nie ma korytarza.</p>
+        <p>Jest ten sam pokój.</p>
+        <p>Na podłodze leżysz Ty.</p>
+        <p>Telefon pokazuje 03:16.</p>
+        `,
+        "ZAKOŃCZENIE: PĘTLA"
+      );
+    }
+
+    function surviveEnding() {
+      ending(
+        `
+        <p>Zamykasz oczy.</p>
+        <p>Kroki zatrzymują się tuż obok.</p>
+        <p>Nie ruszasz się.</p>
+        <p>Po długiej chwili słyszysz ptaki za oknem.</p>
+        <p>Kiedy otwierasz oczy, jest 06:41.</p>
+        <p>Drzwi są otwarte.</p>
+        `,
+        "ZAKOŃCZENIE: ŚWIT"
+      );
+    }
+
+    function secretEnding() {
+      ending(
+        `
+        <p>Nie otwierasz drzwi.</p>
+        <p>Zamiast tego gasisz światło.</p>
+        <p>W ciemności lustro zaczyna świecić.</p>
+        <p>Po jego drugiej stronie widzisz pokój.</p>
+        <p>I siebie, śpiącą spokojnie we własnym łóżku.</p>
+        <p>W końcu rozumiesz, gdzie naprawdę jesteś.</p>
+        `,
+        "UKRYTE ZAKOŃCZENIE: DRUGA STRONA"
+      );
+    }
+
+    function ending(text, title) {
+      story.innerHTML = text + `<p class="ending">${title}</p>`;
+
+      choices.innerHTML = "";
+
+      const restart = document.createElement("button");
+      restart.textContent = "Zagraj ponownie";
+      restart.onclick = restartGame;
+
+      choices.appendChild(restart);
+    }
+
+    function restartGame() {
+      gameState.readMessage = false;
+      gameState.checkedMirror = false;
+      gameState.heardVoice = false;
+      startGame();
+    }
+
+    startGame();
   </script>
 
 </body>
